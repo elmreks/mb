@@ -5,68 +5,460 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Morning Brief</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 32px 16px;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #ffffff;
-      color: #111111;
-      display: flex;
-      justify-content: center;
+    :root{
+      --bg:#ffffff;
+      --ink:#0f172a;          /* slate-900 */
+      --muted:#64748b;        /* slate-500 */
+      --line:#e2e8f0;         /* slate-200 */
+      --card:#ffffff;
+      --shadow: 0 18px 40px rgba(2, 6, 23, .08);
+
+      --a:#2563eb;            /* blue-600 */
+      --b:#06b6d4;            /* cyan-500 */
+      --c:#a855f7;            /* purple-500 */
+      --d:#f97316;            /* orange-500 */
+      --e:#22c55e;            /* green-500 */
+      --chip:#f8fafc;         /* slate-50 */
     }
-    .shell {
-      width: 100%;
-      max-width: 960px;
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      padding: 28px 16px 56px;
+      display:flex;
+      justify-content:center;
     }
-    header {
-      margin-bottom: 20px;
-      border-bottom: 1px solid #e5e5e5;
-      padding-bottom: 12px;
+    .wrap{ width:100%; max-width: 980px; }
+
+    /* Top bar */
+    .top{
+      border:1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px 18px 14px;
+      background:
+        radial-gradient(900px 240px at 10% 0%, rgba(37,99,235,.12), transparent 55%),
+        radial-gradient(900px 240px at 55% 0%, rgba(6,182,212,.12), transparent 55%),
+        radial-gradient(900px 240px at 90% 0%, rgba(168,85,247,.10), transparent 55%),
+        var(--card);
+      box-shadow: var(--shadow);
     }
-    h1 {
-      margin: 0;
-      font-size: 32px;
-      letter-spacing: 0.03em;
+
+    .date{
+      display:flex;
+      gap:14px;
+      align-items:baseline;
+      justify-content:space-between;
+      flex-wrap:wrap;
     }
-    .subline {
+    h1{
+      margin:0;
+      font-size: 34px;
+      letter-spacing: .02em;
+      line-height: 1.05;
+    }
+    .greet{
+      font-size: 16px;
+      color: var(--muted);
       margin-top: 6px;
-      font-size: 15px;
-      color: #555555;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      align-items: baseline;
     }
-    .subline span.label {
-      text-transform: uppercase;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      color: #888;
+    .badges{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 14px;
     }
-    .subline strong {
-      font-weight: 600;
+    .chip{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--chip);
+      border-radius: 999px;
+      font-size: 14px;
+      color: var(--muted);
     }
+    .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: var(--a);
+      box-shadow: 0 0 0 6px rgba(37,99,235,.12);
+    }
+    .dot.weather{ background: var(--d); box-shadow: 0 0 0 6px rgba(249,115,22,.14); }
+    .dot.place{ background: var(--e); box-shadow: 0 0 0 6px rgba(34,197,94,.14); }
 
-    .layout {
-      display: grid;
+    input[type="text"]{
+      border: none;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      color: var(--ink);
+      width: 220px;
+    }
+    input::placeholder{ color: #94a3b8; }
+
+    /* Main grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .9fr;
       gap: 16px;
-      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+      margin-top: 16px;
     }
-    @media (max-width: 780px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
     }
 
-    .card {
-      background: #ffffff;
+    .card{
+      border:1px solid var(--line);
+      border-radius: 22px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 16px 16px 14px;
+    }
+
+    .sectionHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:12px;
+      margin-bottom: 12px;
+    }
+    .sectionHead h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .tag{
+      font-size: 12px;
+      color: var(--muted);
+      padding: 6px 10px;
+      border:1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    /* News list */
+    ol{
+      margin:0;
+      padding-left: 20px;
+    }
+    li{ margin: 10px 0; line-height: 1.35; }
+    .news li::marker{ color: var(--b); font-weight: 700; }
+
+    /* Calendar boxes */
+    .cal{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 860px){
+      .cal{ grid-template-columns: 1fr; }
+    }
+    .mini{
+      border:1px solid var(--line);
       border-radius: 18px;
-      border: 1px solid #e5e5e5;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      padding: 16px 18px 18px;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(148,163,184,.10), transparent 60%);
+      min-height: 140px;
+    }
+    .mini h3{
+      margin:0 0 8px;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .mini ul{ margin:0; padding-left: 16px; }
+    .mini li{ margin: 8px 0; }
+    .today .mini{ background: linear-gradient(180deg, rgba(37,99,235,.10), transparent 60%); }
+    .week  .mini{ background: linear-gradient(180deg, rgba(168,85,247,.10), transparent 60%); }
+    .month .mini{ background: linear-gradient(180deg, rgba(34,197,94,.10), transparent 60%); }
+
+    /* Inspiration */
+    .quote{
+      border-left: 6px solid var(--c);
+      padding: 12px 12px 12px 14px;
+      border-radius: 14px;
+      background: rgba(168,85,247,.08);
+      font-size: 16px;
+      line-height: 1.4;
+    }
+    .quote strong{ color: var(--ink); }
+
+    /* Footer actions */
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 12px;
+    }
+    button{
+      appearance:none;
+      border:1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor:pointer;
+      transition: transform .05s, box-shadow .1s;
+    }
+    button.primary{
+      background: var(--ink);
+      color:#fff;
+      border-color: var(--ink);
+    }
+    button:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(2,6,23,.10); }
+    button:active{ transform: translateY(0); box-shadow:none; }
+
+    .tiny{ color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+    /* Editable blocks */
+    .editable{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 14px;
+      min-height: 160px;
+      outline:none;
+      background: #fff;
+      line-height: 1.4;
+    }
+    .editable:focus{
+      border-color: rgba(37,99,235,.45);
+      box-shadow: 0 0 0 6px rgba(37,99,235,.10);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="date">
+        <div>
+          <h1 id="dateHeading">Wednesday, December 17</h1>
+          <div class="greet">Good morning, Ethan. Coffee first. Then we conquer shit.</div>
+        </div>
+      </div>
+
+      <div class="badges">
+        <div class="chip">
+          <span class="dot"></span>
+          <span><span style="color:var(--muted)">Time</span> • <strong id="timeNow">7:06 AM</strong></span>
+        </div>
+
+        <div class="chip">
+          <span class="dot weather"></span>
+          <span><span style="color:var(--muted)">Weather</span> • </span>
+          <input id="weatherInput" type="text" value="☀️ 54°F • Clear • High 61 / Low 48" />
+        </div>
+
+        <div class="chip">
+          <span class="dot place"></span>
+          <span><span style="color:var(--muted)">Place</span> • <strong>San Francisco</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left column: news + inspiration -->
+      <div class="card">
+        <div class="sectionHead">
+          <h2>News</h2>
+          <span class="tag">Headlines (max 5)</span>
+        </div>
+
+        <ol class="news" id="newsList" contenteditable="true" spellcheck="false" style="margin:0; padding-left:20px;">
+          <li>Local: Something important happened. Check later, don’t doomscroll now.</li>
+          <li>Tech: Big company did big company shit.</li>
+          <li>Markets: Numbers went up/down. Nobody knows why.</li>
+          <li>World: Complicated. Be kind anyway.</li>
+          <li>Personal: Your only real job today is to show up and do the next right thing.</li>
+        </ol>
+
+        <div class="sectionHead" style="margin-top:18px;">
+          <h2>Inspiration / Funny / Bullshit</h2>
+          <span class="tag">One liner</span>
+        </div>
+
+        <div class="quote" id="quote" contenteditable="true" spellcheck="false">
+          <strong>Reminder:</strong> you’re not behind — you’re just waking up. Now go be dangerous (in a good way).
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="saveBtn">Save</button>
+          <button id="speakBtn">Speak</button>
+          <button id="stopBtn">Stop</button>
+        </div>
+
+        <div class="tiny" id="status">Demo mode: editable text. Save stores locally in this browser.</div>
+      </div>
+
+      <!-- Right column: calendar -->
+      <div class="card">
+        <div class="sectionHead">
+          <h2>My Calendar / Events</h2>
+          <span class="tag">Today • Week • Month</span>
+        </div>
+
+        <div class="cal">
+          <div class="today">
+            <div class="mini">
+              <h3>Today</h3>
+              <ul contenteditable="true" spellcheck="false">
+                <li>Coffee, stretch, don’t piss off your shoulder.</li>
+                <li>One real work block (90 mins).</li>
+                <li>Text Darren / handle Ray nonsense (if needed).</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="week">
+            <div class="mini">
+              <h3>This Week</h3>
+              <ul contenteditable="true" spellcheck="false">
+                <li>PT / shoulder plan: schedule or research.</li>
+                <li>Make one improvement to Morning Brief.</li>
+                <li>Keep life simple. Sleep like you mean it.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="month">
+            <div class="mini">
+              <h3>This Month</h3>
+              <ul contenteditable="true" spellcheck="false">
+                <li>Health insurance: pick a path and execute.</li>
+                <li>Stabilize work rhythm without wrecking body.</li>
+                <li>Ship AXIS MVP v0.1 (structure first).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="sectionHead" style="margin-top:16px;">
+          <h2>Notes</h2>
+          <span class="tag">Scratchpad</span>
+        </div>
+
+        <div class="editable" id="notes" contenteditable="true" spellcheck="false">
+Top 3 priorities:
+1) Coffee
+2) Shoulder-friendly plan
+3) One tiny win on the brief page
+
+Loose ends:
+- Nothing heroic today. Just consistent.
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // Basic “demo but useful” persistence (same-device only)
+  const LS = {
+    weather: "mb_weather_v2",
+    news: "mb_news_v2",
+    quote: "mb_quote_v2",
+    notes: "mb_notes_v2",
+  };
+
+  const dateHeading = document.getElementById("dateHeading");
+  const timeNow = document.getElementById("timeNow");
+  const weatherInput = document.getElementById("weatherInput");
+  const newsList = document.getElementById("newsList");
+  const quote = document.getElementById("quote");
+  const notes = document.getElementById("notes");
+  const status = document.getElementById("status");
+
+  const saveBtn = document.getElementById("saveBtn");
+  const speakBtn = document.getElementById("speakBtn");
+  const stopBtn = document.getElementById("stopBtn");
+
+  function updateDateTime(){
+    const d = new Date();
+    dateHeading.textContent = d.toLocaleDateString(undefined, {
+      weekday:"long", year:"numeric", month:"long", day:"numeric"
+    });
+    timeNow.textContent = d.toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 30_000);
+
+  // Restore saved
+  const w = localStorage.getItem(LS.weather); if (w) weatherInput.value = w;
+  const n = localStorage.getItem(LS.news); if (n) newsList.innerHTML = n;
+  const q = localStorage.getItem(LS.quote); if (q) quote.innerHTML = q;
+  const no = localStorage.getItem(LS.notes); if (no) notes.innerHTML = no;
+
+  function setStatus(msg){ status.textContent = msg; }
+
+  function save(){
+    localStorage.setItem(LS.weather, weatherInput.value || "");
+    localStorage.setItem(LS.news, newsList.innerHTML || "");
+    localStorage.setItem(LS.quote, quote.innerHTML || "");
+    localStorage.setItem(LS.notes, notes.innerHTML || "");
+    setStatus("Saved. Your future self says thanks.");
+  }
+
+  saveBtn.addEventListener("click", save);
+
+  // Speech: reads Weather + News + Calendar + Quote + Notes
+  function getSpeakText(){
+    const pieces = [];
+    pieces.push(dateHeading.textContent);
+    pieces.push("Time " + timeNow.textContent);
+    if (weatherInput.value.trim()) pieces.push("Weather. " + weatherInput.value.trim());
+
+    // News: extract text from list items
+    const tmp = document.createElement("div");
+    tmp.innerHTML = newsList.innerHTML;
+    const items = [...tmp.querySelectorAll("li")].map(li => li.textContent.trim()).filter(Boolean).slice(0,5);
+    if (items.length){
+      pieces.push("Headlines.");
+      items.forEach((t, i) => pieces.push(`Headline ${i+1}. ${t}`));
     }
 
-    .row {
-      display: flex;
-      flex-wrap: wrap;
+    // Quote + notes
+    pieces.push("Note to self. " + quote.textContent.trim());
+    pieces.push("Notes. " + notes.textContent.trim());
+
+    return pieces.join("\n");
+  }
+
+  function speak(text){
+    if (!("speechSynthesis" in window)) { setStatus("Speech not supported in this browser."); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 1.05;
+    u.onend = () => setStatus("Done speaking. Now go do the thing.");
+    u.onerror = () => setStatus("Speech error. Try again.");
+    speechSynthesis.speak(u);
+    setStatus("Speaking...");
+  }
+
+  speakBtn.addEventListener("click", () => speak(getSpeakText()));
+  stopBtn.addEventListener("click", () => { if ("speechSynthesis" in window) speechSynthesis.cancel(); setStatus("Stopped."); });
+
+  // Autosave (light)
+  let t;
+  function scheduleAutosave(){
+    clearTimeout(t);
+    t = setTimeout(save, 800);
+  }
+  weatherInput.addEventListener("input", scheduleAutosave);
+  newsList.addEventListener("input", scheduleAutosave);
+  quote.addEventListener("input", scheduleAutosave);
+  notes.addEventListener("input", scheduleAutosave);
+})();
+</script>
+</body>
+</html>
