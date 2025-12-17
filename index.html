@@ -5,231 +5,68 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Morning Brief</title>
   <style>
-    :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; max-width: 900px; }
-    h1 { margin: 0 0 8px; font-size: 28px; }
-    .meta { opacity: .75; margin-bottom: 16px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
-    button, select, input[type="range"] {
-      font-size: 16px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(127,127,127,.35);
-      background: transparent;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
+      color: #111111;
+      display: flex;
+      justify-content: center;
     }
-    button { cursor: pointer; }
-    button.primary { font-weight: 700; }
-    textarea {
-      width: 100%; min-height: 300px; font-size: 16px; line-height: 1.4; padding: 14px;
-      border-radius: 14px; border: 1px solid rgba(127,127,127,.35); resize: vertical;
+    .shell {
+      width: 100%;
+      max-width: 960px;
     }
-    .card { padding: 14px; border: 1px solid rgba(127,127,127,.35); border-radius: 14px; }
-    .small { font-size: 14px; opacity: .8; }
-    .split { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 860px) { .split { grid-template-columns: 2fr 1fr; } }
-    .list { display: grid; gap: 8px; }
-    .item { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(127,127,127,.35); cursor: pointer; }
-    .item:hover { opacity: .9; }
-    .danger { opacity: .9; }
-  </style>
-</head>
-<body>
-  <h1>Morning Brief</h1>
-  <div class="meta" id="meta"></div>
-
-  <div class="split">
-    <div class="card">
-      <div class="row">
-        <button class="primary" id="saveBtn">Save (A)</button>
-        <button id="prevBtn">Previous (X)</button>
-        <button id="clearBtn" class="danger">Clear</button>
-      </div>
-
-      <textarea id="brief" placeholder="Write your brief...
-- Today at a glance
-- Top 3 priorities
-- Loose ends
-- Notes"></textarea>
-
-      <div class="row" style="margin-top:14px;">
-        <button id="speakBtn">Speak (S)</button>
-        <button id="stopBtn">Stop</button>
-
-        <label class="small">Rate
-          <input id="rate" type="range" min="0.7" max="1.5" step="0.05" value="1.05" />
-        </label>
-
-        <select id="voice"></select>
-      </div>
-
-      <div class="small" id="status"></div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong>History</strong>
-        <span class="small">(tap to load)</span>
-      </div>
-      <div class="list" id="history"></div>
-    </div>
-  </div>
-
-<script>
-(() => {
-  // ---- Config ----
-  const MAX_HISTORY = 14; // change to 7/30 if you want
-  const LS_CURRENT = "mb_current";
-  const LS_HISTORY = "mb_history";
-
-  // ---- Elements ----
-  const meta = document.getElementById("meta");
-  const brief = document.getElementById("brief");
-  const status = document.getElementById("status");
-  const historyEl = document.getElementById("history");
-
-  const saveBtn = document.getElementById("saveBtn");
-  const prevBtn = document.getElementById("prevBtn");
-  const clearBtn = document.getElementById("clearBtn");
-
-  const speakBtn = document.getElementById("speakBtn");
-  const stopBtn = document.getElementById("stopBtn");
-  const rateEl = document.getElementById("rate");
-  const voiceEl = document.getElementById("voice");
-
-  // ---- Date/Meta ----
-  function nowLabel() {
-    const d = new Date();
-    return d.toLocaleString(undefined, { weekday:"long", year:"numeric", month:"long", day:"numeric", hour:"numeric", minute:"2-digit" });
-  }
-  function setMeta() {
-    meta.textContent = `${nowLabel()} • San Francisco`;
-  }
-  setMeta();
-  setInterval(setMeta, 30_000);
-
-  // ---- Storage helpers ----
-  function loadHistory() {
-    try { return JSON.parse(localStorage.getItem(LS_HISTORY) || "[]"); }
-    catch { return []; }
-  }
-  function saveHistory(arr) {
-    localStorage.setItem(LS_HISTORY, JSON.stringify(arr.slice(0, MAX_HISTORY)));
-  }
-  function setStatus(msg) { status.textContent = msg; }
-
-  // Autosave current draft
-  const savedDraft = localStorage.getItem(LS_CURRENT);
-  if (savedDraft) brief.value = savedDraft;
-
-  brief.addEventListener("input", () => {
-    localStorage.setItem(LS_CURRENT, brief.value);
-    setStatus("Draft saved.");
-  });
-
-  // ---- Render history ----
-  function renderHistory() {
-    const h = loadHistory();
-    historyEl.innerHTML = "";
-    if (!h.length) {
-      const div = document.createElement("div");
-      div.className = "small";
-      div.textContent = "No saved briefs yet. Hit Save (A).";
-      historyEl.appendChild(div);
-      return;
+    header {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e5e5e5;
+      padding-bottom: 12px;
     }
-    h.forEach((item, idx) => {
-      const div = document.createElement("div");
-      div.className = "item";
-      const preview = (item.text || "").trim().split("\n").slice(0,2).join(" • ").slice(0,90);
-      div.innerHTML = `<div><strong>${item.date}</strong></div><div class="small">${preview || "(empty)"}</div>`;
-      div.addEventListener("click", () => {
-        brief.value = item.text || "";
-        localStorage.setItem(LS_CURRENT, brief.value);
-        setStatus(`Loaded: ${item.date}`);
-      });
-      historyEl.appendChild(div);
-    });
-  }
-  renderHistory();
-
-  // ---- Save/Prev/Clear ----
-  saveBtn.addEventListener("click", () => {
-    const text = brief.value || "";
-    const entry = { date: new Date().toLocaleString(), text };
-    const h = loadHistory();
-    h.unshift(entry);
-    saveHistory(h);
-    renderHistory();
-    setStatus("Saved to history.");
-  });
-
-  prevBtn.addEventListener("click", () => {
-    const h = loadHistory();
-    if (h.length < 2) { setStatus("No previous brief yet."); return; }
-    brief.value = h[1].text || "";
-    localStorage.setItem(LS_CURRENT, brief.value);
-    setStatus(`Loaded previous: ${h[1].date}`);
-  });
-
-  clearBtn.addEventListener("click", () => {
-    brief.value = "";
-    localStorage.setItem(LS_CURRENT, "");
-    setStatus("Cleared.");
-  });
-
-  // ---- Speech (Web Speech API) ----
-  let voices = [];
-  function loadVoices() {
-    voices = speechSynthesis.getVoices();
-    voiceEl.innerHTML = "";
-    voices.forEach((v, i) => {
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = `${v.name} (${v.lang})`;
-      voiceEl.appendChild(opt);
-    });
-  }
-  loadVoices();
-  if ("onvoiceschanged" in speechSynthesis) speechSynthesis.onvoiceschanged = loadVoices;
-
-  function speak(text) {
-    if (!("speechSynthesis" in window)) {
-      alert("Speech not supported in this browser.");
-      return;
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      letter-spacing: 0.03em;
     }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const rate = parseFloat(rateEl.value || "1");
-    u.rate = rate;
-
-    const idx = parseInt(voiceEl.value || "0", 10);
-    if (voices[idx]) u.voice = voices[idx];
-
-    u.onend = () => setStatus("Done speaking.");
-    u.onerror = () => setStatus("Speech error (try again).");
-
-    speechSynthesis.speak(u);
-    setStatus("Speaking...");
-  }
-
-  speakBtn.addEventListener("click", () => {
-    const text = (brief.value || "").trim();
-    if (!text) { setStatus("Nothing to speak."); return; }
-    speak(text);
-  });
-
-  stopBtn.addEventListener("click", () => {
-    speechSynthesis.cancel();
-    setStatus("Stopped.");
-  });
-
-  // Keyboard shortcuts (nice and simple)
-  document.addEventListener("keydown", (e) => {
-    if (e.target && e.target.tagName === "TEXTAREA") {
-      if (e.metaKey || e.ctrlKey) return;
+    .subline {
+      margin-top: 6px;
+      font-size: 15px;
+      color: #555555;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      align-items: baseline;
     }
-    if (e.key.toLowerCase() === "a") { saveBtn.click(); }
-    if (e.key.toLowerCase() === "x") { prevBtn.click(); }
-    if (e.key.toLowerCase() === "s") { speakBtn.click(); }
-  });
-})();
-</script>
-</body>
-</html>
+    .subline span.label {
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: #888;
+    }
+    .subline strong {
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+    }
+    @media (max-width: 780px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      padding: 16px 18px 18px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
